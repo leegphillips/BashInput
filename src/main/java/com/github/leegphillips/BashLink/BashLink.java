@@ -19,14 +19,11 @@ public class BashLink
 
     private static final ExecutorService POOL = Executors.newFixedThreadPool(256);
 
-    public List<File> process(InputStream in) throws IOException {
+    public List<File> process(File root, InputStream in) throws IOException {
         List<CompletableFuture<File>> futures = new ArrayList<>();
 
-        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in))) {
-            buffer.lines()
-                    .forEach(
-                            line ->
-                            futures.add(addFile(line)));
+        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(in))) {
+            buffer.lines().forEach(line -> futures.add(addFile(root, line)));
         }
 
         return futures.stream().map(CompletableFuture::join)
@@ -34,18 +31,18 @@ public class BashLink
                 .collect(toList());
     }
 
-    private CompletableFuture<File> addFile(String line) {
+    private CompletableFuture<File> addFile(File root, String line) {
         LOG.debug("Supplied file: " + line);
         return CompletableFuture.supplyAsync(() -> {
-            File file = new File(line);
+            File file = new File(root, line);
             LOG.debug("File found: " + file.getAbsolutePath());
             LOG.debug("Exists: " + file.exists());
-            return file;
+            return file.exists() ? file : null;
         }, POOL);
     }
 
     public static void main( String[] args ) throws IOException {
-        new BashLink().process(System.in);
+        new BashLink().process(new File("."), System.in);
         POOL.shutdown();
     }
 }

@@ -30,14 +30,14 @@ public class BashLinkTest {
 
     @Test
     public void test() throws IOException {
-//        StringBuilder builder = new StringBuilder();
-//        for (File file : folder.getRoot().listFiles()) {
-//            builder.append(file.getName());
-//            builder.append("\n");
-//        }
-//
-//        InputStream in = new ByteArrayInputStream(builder.toString().getBytes(StandardCharsets.UTF_8));
-//
-//        assertEquals(FILES_COUNT, new BashLink().process(in).size());
+        StringBuilder builder = new StringBuilder();
+        for (File file : folder.getRoot().listFiles()) {
+            builder.append(file.getName());
+            builder.append("\n");
+        }
+
+        InputStream in = new ByteArrayInputStream(builder.toString().getBytes(StandardCharsets.UTF_8));
+
+        assertEquals(FILES_COUNT, new BashLink().process(folder.getRoot(), in).size());
     }
 }
