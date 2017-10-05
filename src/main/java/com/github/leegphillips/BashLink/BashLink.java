@@ -20,15 +20,13 @@ public class BashLink
     private static final ExecutorService POOL = Executors.newFixedThreadPool(256);
 
     public List<File> process(File root, InputStream in) throws IOException {
-        List<CompletableFuture<File>> futures = new ArrayList<>();
-
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(in))) {
-            buffer.lines().forEach(line -> futures.add(addFile(root, line)));
+            return buffer.lines()
+                    .map(line -> addFile(root, line))
+                    .map(CompletableFuture::join)
+                    .filter(Objects::nonNull)
+                    .collect(toList());
         }
-
-        return futures.stream().map(CompletableFuture::join)
-                .filter(Objects::nonNull)
-                .collect(toList());
     }
 
     private CompletableFuture<File> addFile(File root, String line) {
